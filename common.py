@@ -119,13 +119,15 @@ def save_ir(ir: dict) -> Path:
 
 
 def merge_ir(ir: dict) -> str:
-    """merge policy: newer updated_at wins; deterministic rerun is idempotent."""
+    """merge policy: newer updated_at wins; identical content -> unchanged."""
     p = ir_path(ir["id"])
     if p.exists():
         try:
             old = json.loads(p.read_text(encoding="utf-8"))
             if old.get("updated_at", "") > ir.get("updated_at", ""):
                 return "kept-old"
+            if old == ir:
+                return "unchanged"
         except Exception:
             pass
     save_ir(ir)

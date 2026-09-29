@@ -67,10 +67,18 @@ def parse_file(f: Path) -> Conv:
                 except Exception:
                     pass
             elif "compact" in t or "checkpoint" in t:
-                blob = json.dumps(d, ensure_ascii=False)
-                if len(blob) > 200 and not conv.ir["prebuilt_digest"]:
-                    conv.ir["prebuilt_digest"] = blob[:4000]
-                conv.note(f"压缩/检查点事件 {t}(存档)")
+                if not conv.ir["prebuilt_digest"]:
+                    txt = ""
+                    s = d.get("summary")
+                    if isinstance(s, list):
+                        txt, _ = text_from_content(s)
+                    elif isinstance(s, str):
+                        txt = s
+                    elif isinstance(d.get("text"), str):
+                        txt = d["text"]
+                    if txt and len(txt) > 100:
+                        conv.ir["prebuilt_digest"] = txt[:6000]
+                conv.note(f"压缩/检查点事件 {t}(已存为早期摘要)")
             else:
                 conv.drop(t or "NO-TYPE")
     if n_stream:

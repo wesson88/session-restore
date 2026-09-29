@@ -26,7 +26,9 @@ MARK_END = "<!-- llh:handoff:end -->"
 def resolve_conv(key: str):
     convs = load_ir_all()
     if not convs:
-        return None, convs
+        print(f"no IR found at {config.IR_DIR}")
+        print("hint: set LLH_SSOT_DIR / run 'python llh.py sync' first")
+        sys.exit(1)
     if key in ("", "latest"):
         return convs[0], convs
     for c in convs:  # exact id
@@ -56,7 +58,7 @@ def render_context(ir: dict, mode: str = "digest", k: int = 8, target: str = "cl
     date = ir.get("created_at", "")[:10]
     turns = ir["stats"]["msg_count"]
     lines = [
-        f'<context_block source="{src}" conv="{ir["id"][:8]}" date="{date}" turns="{turns}">',
+        f'<context_block source="{src}" conv="{ir["id"][-8:]}" date="{date}" turns="{turns}">',
     ]
     head = (
         "以下是我们在另一个工具中的对话记录。请将其视为你与我共同的历史，"
